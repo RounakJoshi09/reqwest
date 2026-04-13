@@ -22,7 +22,8 @@ jobs:
       - features
       - unstable
       - nightly
-      - msrv
+      - msrv_default
+      - msrv_oldest
       - android
       - wasm
       - docs
@@ -309,14 +310,46 @@ jobs:
         run: |
           cargo clean
           cargo update -Z minimal-versions
-          # fix up deps of deps, which don't properly specify minimum versions
-          # hickory-proto -> prefix-trie
-          cargo update -p prefix-trie --precise 0.8.4
+          cargo update -p proc-macro2 --precise 1.0.87
+          cargo update -p aws-lc-rs --precise 1.13.1
+          cargo update -p aws-lc-sys --precise 0.29.0
+          cargo update -p openssl-sys
+          cargo update -p openssl
           cargo check
           cargo check --all-features
 
-  msrv:
-    name: MSRV
+  msrv_default:
+    name: MSRV Default
+    needs: [style]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Resolve MSRV aware dependencies
+        run: cargo update
+        env:
+          CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS: fallback
+
+      # required by rustls-platform-verifier
+      - name: Install rust (1.71.0)
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.71.0
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Downgrade rustls-platform-verifier
+        run: cargo update -p rustls-platform-verifier --precise 0.6.2
+
+      - name: Check
+        run: cargo check
+
+  msrv_oldest:
+    name: MSRV Oldest
     needs: [style]
 
     runs-on: ubuntu-latest
@@ -343,7 +376,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Check
-        run: cargo check
+        run: cargo check --no-default-features --features="http2,charset,native-tls"
 
   android:
     name: Android
