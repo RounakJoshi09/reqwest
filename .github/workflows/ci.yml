@@ -36,7 +36,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
@@ -65,11 +65,13 @@ jobs:
       matrix:
         name:
           - linux / stable
+          - linux / stable-aarch64-gnu
           - linux / beta
           # - linux / nightly
           - macOS / stable
           - windows / stable-x86_64-msvc
           - windows / stable-i686-msvc
+          - windows / stable-aarch64-msvc
           - windows / stable-x86_64-gnu
           - windows / stable-i686-gnu
           - "feat.: default-tls disabled"
@@ -95,6 +97,9 @@ jobs:
 
         include:
           - name: linux / stable
+          - name: linux / stable-aarch64-gnu
+            os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
           - name: linux / beta
             rust: beta
           # - name: linux / nightly
@@ -110,6 +115,11 @@ jobs:
           - name: windows / stable-i686-msvc
             os: windows-latest
             target: i686-pc-windows-msvc
+            features: "--features blocking,gzip,brotli,zstd,deflate,query,form,json,multipart,stream"
+            aws_lc_sys_prebuilt_nasm: 1
+          - name: windows / stable-aarch64-msvc
+            os: windows-11-arm
+            target: aarch64-pc-windows-msvc
             features: "--features blocking,gzip,brotli,zstd,deflate,query,form,json,multipart,stream"
             aws_lc_sys_prebuilt_nasm: 1
           - name: windows / stable-x86_64-gnu
@@ -173,7 +183,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install rust
         uses: dtolnay/rust-toolchain@master
@@ -224,7 +234,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -245,7 +255,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install rust
         uses: dtolnay/rust-toolchain@master
@@ -265,7 +275,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -285,7 +295,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install rust
         uses: dtolnay/rust-toolchain@nightly
@@ -299,6 +309,9 @@ jobs:
         run: |
           cargo clean
           cargo update -Z minimal-versions
+          # fix up deps of deps, which don't properly specify minimum versions
+          # hickory-proto -> prefix-trie
+          cargo update -p prefix-trie --precise 0.8.4
           cargo check
           cargo check --all-features
 
@@ -310,7 +323,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - uses: dtolnay/rust-toolchain@stable
       - name: Resolve MSRV aware dependencies
@@ -340,7 +353,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
@@ -361,7 +374,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
