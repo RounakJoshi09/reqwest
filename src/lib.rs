@@ -356,7 +356,7 @@ if_hyper! {
     extern crate doc_comment;
 
     #[cfg(test)]
-    doctest!("../README.md");
+    doctest!("../docs/README.md");
 
     pub use self::async_impl::{
         Body, Client, ClientBuilder, Request, RequestBuilder, Response, Upgraded,
